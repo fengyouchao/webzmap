@@ -1,0 +1,16 @@
+.DS_Store
+*~
+.settings/
+.project
+.classpath
+target/
+/cache/
+*.bak
+*.log
+.idea/
+*.iml
+*.sqlite3
+*.pyc
+._*
+nohup.out
+static/upload
