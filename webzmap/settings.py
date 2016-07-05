@@ -116,9 +116,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+WORK_DIR = os.path.join(BASE_DIR, "workspace")
+
+if not os.path.exists(WORK_DIR):
+    os.makedirs(WORK_DIR)
+
 ZMAP = {
     "EXECUTE": "/usr/local/sbin/zmap",
-    "CWD": os.path.join(BASE_DIR, "zmap_workspace")
+    "CWD": WORK_DIR
 }
 
 CRONJOBS = [
@@ -157,7 +162,7 @@ LOGGING = {
         },
         'cron': {
             'handlers': ['file_handler'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False
         },
     }

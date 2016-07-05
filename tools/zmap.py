@@ -31,6 +31,12 @@ class ShellExecuteError(BaseException):
         super(ShellExecuteError, self).__init__(error_msg)
 
 
+def create_parent_dir(path):
+    parent = os.path.dirname(path)
+    if not os.path.exists(parent):
+        os.makedirs(parent)
+
+
 def get_last_line(path):
     cmd = "tail -n 1 %s" % path
     p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -82,16 +88,26 @@ class Zmap(object):
             self.verbosity = verbosity
         cmd = "%s -p %s" % (self.execute_bin, port)
         if output_path:
+            output_path = os.path.join(self.cwd, output_path)
+            create_parent_dir(output_path)
             cmd += ' -o %s' % output_path
         if bandwidth:
             cmd += " -B %sM" % bandwidth
         if white_list:
+            white_list = os.path.join(self.cwd, white_list)
+            create_parent_dir(white_list)
             cmd += " -w %s" % white_list
         if black_list:
+            black_list = os.path.join(self.cwd, black_list)
+            create_parent_dir(black_list)
             cmd += " -b %s" % black_list
         if status_updates_path:
+            status_updates_path = os.path.join(self.cwd, update_file_path)
+            create_parent_dir(status_updates_path)
             cmd += " -u %s" % status_updates_path
         if log_path:
+            log_path = os.path.join(self.cwd, log_path)
+            create_parent_dir(log_path)
             cmd += " -l %s" % log_path
         cmd += ' -v %s' % self.verbosity
         if quiet:
@@ -108,4 +124,5 @@ if __name__ == '__main__':
     zmap.scan(80, output_path="output.ip", status_updates_path=update_file_path)
     status = get_current_status(update_file_path)
     import json
+
     print json.dumps(status)
