@@ -1,0 +1,130 @@
+{% extends "base.html" %}{% load staticfiles %}
+{% block body %}
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <a class="navbar-brand" href="/"><img height="20px"
+                                          src="/static/img/dnsdb_white.png"
+                                          style="padding-left: 3px; padding-top: 1px"/></a>
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+            <li><a href="/api">REST API</a></li>
+            <li><a href="/admin">Admin</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<div class="container">
+    <h1>WebZmap</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-primary pull-right" data-toggle="modal"
+                            data-target="#newJobModal">New Job
+                    </button>
+                </div>
+            </div>
+            <hr>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                        <th>action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Job Modal -->
+<div class="modal fade" id="newJobModal" tabindex="-1" role="dialog" aria-labelledby="newJobModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="newJobModalLabel">New Job</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="inputName">Job Name</label>
+                        <input type="text" class="form-control" id="inputName" placeholder="Job Name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPort">Target Port</label>
+                        <input type="text" class="form-control" id="inputPort" placeholder="Port">
+                        <p class="help-block">Example: 80</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputFile">IP List file</label>
+                        <input type="file" id="exampleInputFile">
+                        <p class="help-block">Example block-level help text here.</p>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox"> Check me out
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block afterjs %}
+<script charset="UTF-8" src="{% static 'js/template.js' %}"></script>
+<script id="jobRow" type="text/html">{% verbatim %}
+<tr id="{{job.id}}">
+    <th scope="row">{{index+1}}</th>
+    <td>{{job.name}}</td>
+    <td>
+        <div class="progress">
+            <div class="progress-bar progress-bar-success progress-bar-striped {{if job.status==1}} active{{/if}}"
+                 role="progressbar" aria-valuenow="40"
+                 aria-valuemin="0" aria-valuemax="100" style="width: {{job.percent_complete*100}}%">
+            </div>
+        </div>
+    </td>
+    <td>{{if job.status == 0}}<span class="label label-default">Pending</span>
+        {{else if job.status == 1}}<span class="label label-info">Running</span>
+        {{else if job.status == 2}}<span class="label label-success">Done</span>
+        {{/if}}
+    </td>
+    <td>
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                Action
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a href="#">Detail</a></li>
+                <li><a href="#">Delete</a></li>
+            </ul>
+        </div>
+    </td>
+</tr>{% endverbatim %}
+</script>
+<script charset="UTF-8" src="{% static 'js/app.js' %}"></script>
+{% endblock %}

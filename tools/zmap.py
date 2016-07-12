@@ -1,5 +1,8 @@
+from django.utils import timezone
 import os
 import subprocess
+import time
+import datetime
 
 
 class ZmapStatus(object):
@@ -48,12 +51,17 @@ def get_last_line(path):
 
 
 def get_current_status(status_path):
-    line = get_last_line(status_path)
+    try:
+        line = get_last_line(status_path)
+    except ShellExecuteError:
+        return None
     if line.startswith("real-time"):
         return None
     status = ZmapStatus()
     items = line.split(",")
-    status.read_time = items[0]
+    t = time.strptime(items[0], "%Y-%m-%d %X")
+    y, m, d, h, M, s = t[0:6]
+    status.read_time = datetime.datetime(y, m, d, h, M, s, tzinfo=timezone.LocalTimezone())
     status.time_elapsed = int(items[1])
     status.time_remaining = int(items[2])
     status.percent_complete = float(items[3])
@@ -77,13 +85,16 @@ def get_current_status(status_path):
 
 
 class Zmap(object):
-    def __init__(self, execute_bin='/usr/local/sbin/zmap', verbosity=3, cwd=None):
+    def __init__(self, execute_bin='zmap', verbosity=3, cwd=None):
         self.execute_bin = execute_bin
         self.verbosity = verbosity
         self.cwd = cwd
 
-    def scan(self, port, output_path, log_path=None, bandwidth=2, white_list=None, black_list=None, verbosity=None,
-             status_updates_path=None, quiet=False):
+    def run_job(self, job):
+        pass
+
+    def scan(self, port, output_path=None, log_path=None, bandwidth=2, white_list=None, black_list=None, verbosity=None,
+             status_updates_path=None, quiet=False, stdout=None, stderr=None):
         if verbosity:
             self.verbosity = verbosity
         cmd = "%s -p %s" % (self.execute_bin, port)
@@ -102,7 +113,7 @@ class Zmap(object):
             create_parent_dir(black_list)
             cmd += " -b %s" % black_list
         if status_updates_path:
-            status_updates_path = os.path.join(self.cwd, update_file_path)
+            status_updates_path = os.path.join(self.cwd, status_updates_path)
             create_parent_dir(status_updates_path)
             cmd += " -u %s" % status_updates_path
         if log_path:
@@ -112,17 +123,12 @@ class Zmap(object):
         cmd += ' -v %s' % self.verbosity
         if quiet:
             cmd += ' -q'
-        print cmd
-        p = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, cwd=self.cwd)
-        return_code = p.wait()
-        return return_code
+        cmd = filter(lambda x: x.strip() != '', cmd.split(" "))
+        p = subprocess.Popen(cmd, stderr=stderr, stdout=stdout, cwd=self.cwd)
+        return p
 
 
 if __name__ == '__main__':
-    update_file_path = "progress.txt"
     zmap = Zmap()
-    zmap.scan(80, output_path="output.ip", status_updates_path=update_file_path)
-    status = get_current_status(update_file_path)
-    import json
-
-    print json.dumps(status)
+    p = zmap.scan(port=80, output_path=None, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    p.wait()

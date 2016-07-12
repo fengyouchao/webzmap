@@ -1,0 +1,22 @@
+<!DOCTYPE html>{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}WebZmap{% endblock %}</title>
+    <link type="text/css" rel="stylesheet" media="screen" charset="UTF-8"
+          href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="icon" href="{% static 'img/icon.png' %}"/>
+    <style>
+        body {
+          padding-top: 60px;
+        }
+    </style>
+</head>
+<body>
+{% block body %}{% endblock %}
+<script charset="UTF-8" src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<script charset="UTF-8" src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script charset="UTF-8" src="//cdn.bootcss.com/1000hz-bootstrap-validator/0.9.0/validator.min.js"></script>
+{% block afterjs %}{% endblock %}
+</body>
+</html>

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_crontab',
+    'rest_framework',
     'core',
 ]
 
@@ -116,19 +117,33 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+)
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
 WORK_DIR = os.path.join(BASE_DIR, "workspace")
 
 if not os.path.exists(WORK_DIR):
     os.makedirs(WORK_DIR)
+    os.chmod(WORK_DIR, 0777)
 
 ZMAP = {
-    "EXECUTE": "/usr/local/sbin/zmap",
-    "CWD": WORK_DIR
+    "PATH": "/usr/local/sbin/zmap",
+    "CWD": WORK_DIR,
+    "MAX_BANDWIDTH": 100,
+    "DEFAULT_BANDWIDTH": 1,
 }
 
 CRONJOBS = [
     ('*/1 * * * *', 'core.cron.execute_job'),
-    ('*/1 * * * *', 'core.cron.monitor_job_status'),
 ]
 
 LOGGING = {
