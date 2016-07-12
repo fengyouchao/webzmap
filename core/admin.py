@@ -26,19 +26,22 @@ class JobAdmin(admin.ModelAdmin):
 class WhiteListFileAdmin(admin.ModelAdmin):
     list_display = ['name', 'file', 'size', 'remark']
     fieldsets = [
-        (None, {'fields': ['file', 'remark']}),
+        (None, {'fields': ['name', 'file', 'remark']}),
     ]
 
 
 class BlackListFileAdmin(admin.ModelAdmin):
     list_display = ['name', 'file', 'size', 'remark']
     fieldsets = [
-        (None, {'fields': ['file', 'remark']}),
+        (None, {'fields': ['name', 'file', 'remark']}),
     ]
 
 
 class CommandAdmin(admin.ModelAdmin):
-    list_display = ['creation_time', 'cmd', 'job']
+    list_display = ['creation_time', 'cmd', 'job', 'status']
+    fieldsets = [
+        (None, {'fields': ['job', 'cmd']}),
+    ]
 
 
 admin.site.register(Job, JobAdmin)

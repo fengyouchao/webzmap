@@ -58,21 +58,21 @@ class WhiteListFile(models.Model):
 
 
 class Job(models.Model):
-    STATUS_WAITING = 0
+    STATUS_PENDING = 0
     STATUS_RUNNING = 1
     STATUS_DONE = 2
     STATUS_ERROR = 3
-    STATUS_PAUSE = 4
-    STATUS_CANCELED = 5
-    STATUS_STOPPED = 6
+    STATUS_PAUSED = 4
+    STATUS_STOPPED = 5
+    STATUS_CANCELED = 6
     STATUS_CHOICES = (
-        (STATUS_WAITING, u'WAIT'),
+        (STATUS_PENDING, u'PENDING'),
         (STATUS_RUNNING, u'RUNNING'),
         (STATUS_DONE, u'DONE'),
         (STATUS_ERROR, u'ERROR'),
-        (STATUS_PAUSE, u'PAUSE'),
-        (STATUS_CANCELED, u'CANCELED'),
+        (STATUS_PAUSED, u'PAUSE'),
         (STATUS_STOPPED, u'STOPPED'),
+        (STATUS_CANCELED, u'CANCELED'),
     )
     PRIORITY = (
         (0, u'低'),
@@ -163,22 +163,26 @@ class Job(models.Model):
 
 
 class Command(models.Model):
+    STATUS_PENDING = 0
+    STATUS_DONE = 1
+    STATUS_ERROR = 2
     STATUS_TYPES = (
-        (0, u'WAIT'),
-        (1, u'RUNNING'),
-        (2, u'DONE'),
-        (3, u'ERROR'),
+        (STATUS_PENDING, u'Pending'),
+        (STATUS_DONE, u'DONE'),
+        (STATUS_ERROR, u'ERROR'),
     )
+    CMD_PAUSE = 0
+    CMD_CONTINUE = 1
+    CMD_STOP = 2
     CMD_TYPES = (
-        (0, u'PAUSE'),
-        (1, u'CONTINUE'),
-        (2, u'STOP'),
-        (3, u'CANCEL')
+        (CMD_PAUSE, u'PAUSE'),
+        (CMD_CONTINUE, u'CONTINUE'),
+        (CMD_STOP, u'STOP'),
     )
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     creation_time = models.DateTimeField(default=timezone.now)
     cmd = models.IntegerField(choices=CMD_TYPES)
-    status = models.IntegerField(choices=STATUS_TYPES)
+    status = models.IntegerField(choices=STATUS_TYPES, default=STATUS_PENDING)
 
     class Meta:
         verbose_name = '命令'

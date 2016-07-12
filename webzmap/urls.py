@@ -72,7 +72,7 @@ class CommandSerializer(serializers.HyperlinkedModelSerializer):
 
 # ViewSets define the view behavior.
 class JobViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
+    queryset = Job.objects.all().order_by('-creation_time')
     serializer_class = JobSerializer
 
 

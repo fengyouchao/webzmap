@@ -62,31 +62,45 @@
                 <h4 class="modal-title" id="newJobModalLabel">New Job</h4>
             </div>
             <div class="modal-body">
-                <form method="post">
+                <form id="newJobForm">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label for="inputName">Job Name</label>
                         <input type="text" class="form-control" id="inputName" placeholder="Job Name" name="name">
                     </div>
                     <div class="form-group">
                         <label for="inputPort">Target Port</label>
-                        <input type="text" class="form-control" id="inputPort" placeholder="Port">
+                        <input type="text" class="form-control" id="inputPort" placeholder="Port" name="port">
                         <p class="help-block">Example: 80</p>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputFile">IP List file</label>
-                        <input type="file" id="exampleInputFile">
-                        <p class="help-block">Example block-level help text here.</p>
+                        <label for="selectWhiteListFile">White List File</label>
+                        <select class="form-control" id="selectWhiteListFile" name="white_list_file">
+                            <option>Ketchup</option>
+                            <option>Relish</option>
+                        </select>
                     </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox"> Check me out
-                        </label>
+                    <div class="form-group">
+                        <label for="selectBlackListFile">Black List File</label>
+                        <select class="form-control" id="selectBlackListFile" name="black_list_file">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectBlackListFile">Verbosity Level</label>
+                        <select class="form-control" id="selectVerbosity" name="verbosity">
+                            <option value="0">FATAL</option>
+                            <option value="1">ERROR</option>
+                            <option value="2">WARN</option>
+                            <option value="3" selected>INFO</option>
+                            <option value="4">DEBUG</option>
+                            <option value="5">TRACE</option>
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Create</button>
+                <button type="button" class="btn btn-primary" id="createJobButton">Create</button>
             </div>
         </div>
     </div>
@@ -109,6 +123,10 @@
     <td>{{if job.status == 0}}<span class="label label-default">Pending</span>
         {{else if job.status == 1}}<span class="label label-info">Running</span>
         {{else if job.status == 2}}<span class="label label-success">Done</span>
+        {{else if job.status == 3}}<span class="label label-danger">Error</span>
+        {{else if job.status == 4}}<span class="label label-warning">Paused</span>
+        {{else if job.status == 5}}<span class="label label-warning">Stopped</span>
+        {{else if job.status == 6}}<span class="label label-warning">Canceled</span>
         {{/if}}
     </td>
     <td>
@@ -125,6 +143,9 @@
         </div>
     </td>
 </tr>{% endverbatim %}
+</script>
+<script id="fileOption" type="text/html">{% verbatim %}
+<option value="{{file.value}}">{{file.display_name}}</option>{% endverbatim %}
 </script>
 <script charset="UTF-8" src="{% static 'js/app.js' %}"></script>
 {% endblock %}
