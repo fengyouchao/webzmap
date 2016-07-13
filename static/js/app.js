@@ -1,3 +1,39 @@
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+function sameOrigin(url) {
+    // test that a given url is a same-origin URL
+    // url could be relative or scheme relative or absolute
+    var host = document.location.host; // host + port
+    var protocol = document.location.protocol;
+    var sr_origin = '//' + host;
+    var origin = protocol + sr_origin;
+    // Allow absolute or scheme relative URLs to same origin
+    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+        // or any other URL that isn't scheme relative or absolute i.e relative.
+        !(/^(\/\/|http:|https:).*/.test(url));
+}
+
+
 function updateJobStatus(){
    $.get("api/jobs", function(result){
         $("#tableBody").empty();
@@ -8,8 +44,6 @@ function updateJobStatus(){
         });
     });
 }
-
-
 
 
 function getJobOptions(){
@@ -57,17 +91,19 @@ function(event) {
 
 
 function createJob(){
+    var csrftoken = getCookie('csrftoken');
     $("#createJobButton").addClass('disabled');
     $.ajax({
         cache: true,
         type: "POST",
         url:'/api/jobs/',
+        headers:{'X-CSRFToken':csrftoken},
         data:$('#newJobForm').serialize(),
         async: true,
         success: function(data) {
             $("#createJobButton").removeClass('disabled');
-            console.log(data)
-            location.reload();
+            $('#newJobModal').modal('hide');
+            updateJobStatus();
         },
         error: function(request) {
             $("#createJobButton").removeClass('disabled');
@@ -81,14 +117,19 @@ function createJob(){
 }
 
 function deleteJob(url){
+    var csrftoken = getCookie('csrftoken');
     var aj = $.ajax( {
         url:url,
         type:'DELETE',
+        data:$('#deleteJobForm').serialize(),
+        headers:{'X-CSRFToken':csrftoken},
+        async: true,
         cache:false,
         dataType:'json',
         success:function(data) {
             console.log(data)
-//            location.reload();
+            $('#deleteJobModal').modal('hide');
+            updateJobStatus();
         },
         error : function(request) {
             console.log(request)
@@ -98,7 +139,14 @@ function deleteJob(url){
     });
 }
 
-function getLog(id){
+
+function showDeleteJobModal(url){
+     $('#deleteJobModal').modal('show');
+     $('#deleteButton').attr('onclick',"deleteJob('"+url+"')");
+}
+
+function showLog(id){
+    $('#logModal').modal('show');
     url = '/static/' + id + '/job.log';
     $('#logContainer').empty();
     var aj = $.ajax( {
@@ -117,15 +165,11 @@ function getLog(id){
     });
 }
 
-function showLog(id){
-    $('#logModal').modal('show');
-    getLog(id);
+function autoUpdateStatus(time){
+    updateJobStatus();
+    setTimeout("autoUpdateStatus("+time+")", time )
 }
 
-
 $(document).ready(function(){
-    updateJobStatus();
-    $("#createJobButton").click(function(){
-        createJob();
-    });
+    autoUpdateStatus(1000);
 });

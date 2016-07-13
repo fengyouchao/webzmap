@@ -41,7 +41,8 @@
                         <th>Name</th>
                         <th>Progress</th>
                         <th>Status</th>
-                        <th>action</th>
+                        <th>Left Time</th>
+                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -63,7 +64,6 @@
             </div>
             <div class="modal-body">
                 <form id="newJobForm">
-                    {% csrf_token %}
                     <div class="form-group">
                         <label for="inputName">Job Name</label>
                         <input type="text" class="form-control" id="inputName" placeholder="Job Name" name="name">
@@ -110,7 +110,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="createJobButton">Create</button>
+                <button type="button" class="btn btn-primary" id="createJobButton" onclick="createJob()">Create</button>
             </div>
         </div>
     </div>
@@ -127,19 +127,16 @@
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this Job?
-                <form id="logForm">
-                    {% csrf_token %}
-                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-danger" id="deleteJobButton">Delete</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="deleteButton">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Delete Job Modal -->
+<!-- Log Modal -->
 <div class="modal fade" id="logModal" tabindex="-1" role="dialog" aria-labelledby="logModalLabel">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -167,10 +164,9 @@
     <td>
         <div class="progress">
             <div class="progress-bar progress-bar-default progress-bar-striped {{if job.status==1}} active{{/if}}"
-                 role="progressbar" aria-valuenow="40"
-                 aria-valuemin="0" aria-valuemax="100" style="width: {{job.percent_complete*100}}%">
+                 role="progressbar" aria-valuenow="job.percent_complete"
+                 aria-valuemin="0" aria-valuemax="100" style="width: {{job.percent_complete}}%">
             </div>
-            {{job.percent_complete*100}}%
         </div>
     </td>
     <td>{{if job.status == 0}}<span class="label label-default">Pending</span>
@@ -183,13 +179,14 @@
         {{/if}}
     </td>
     <td>
+        {{if job.status==1}}{{job.time_remaining}}s{{else}}-{{/if}}
+    </td>
+    <td>
         <a href="{{if job.status != 2}}#{{else}}static/{{job.id}}/output.txt{{/if}}"
-           class="btn btn-sm btn-default {{if job.status != 2}}disabled{{/if}}">Download</a>
-        <button type="button" class="btn btn-sm btn-default" {{if job.status== 0}}disabled="disabled"{{/if}} onclick="showLog('{{job.id}}')">Log
-        </button>
-        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
-                data-target="#deleteJobModal">DELETE
-        </button>
+           class="btn btn-sm btn-default" {{if job.status != 2}}disabled="disabled"{{/if}}><span class="glyphicon glyphicon-download" aria-hidden="true"></span>Download</a>
+        <button type="button" class="btn btn-sm btn-default" {{if job.status== 0}}disabled="disabled" {{ /if}} onclick="showLog('{{job.id}}')">Log</button>
+        <!--<button type="button" class="btn btn-sm btn-danger" onclick="deleteJob('{{job.url}}')">DELETE</button>-->
+        <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteJobModal('{{job.url}}')"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
     </td>
 </tr>{% endverbatim %}
 </script>

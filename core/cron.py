@@ -7,7 +7,6 @@ import logging
 import os
 import time
 import signal
-import uuid
 
 logger = logging.getLogger('cron')
 cwd = ZMAP['CWD']
@@ -54,9 +53,12 @@ def execute_job():
     logger.debug("run execute job")
     try:
         running_jobs = Job.objects.filter(status=Job.STATUS_RUNNING)
-        if len(running_jobs) > 0:
-            for job in running_jobs:
-                logger.debug(u"detected running: id[%s], name[%s]", job.id, job.name)
+        total_bandwidth = 0
+        for job in running_jobs:
+            total_bandwidth += job.bandwidth
+        if total_bandwidth >= ZMAP['MAX_BANDWIDTH']:
+            logger.debug(u"Achieve maximum bandwidth:%sM", ZMAP['MAX_BANDWIDTH'])
+            return
         else:
             logger.info("fetch waiting jobs")
             jobs = Job.objects.filter(status=Job.STATUS_PENDING).order_by('-priority')
@@ -121,7 +123,9 @@ def execute_job():
                 if exit_code == 0:
                     logger.info("zmap return success code:%s, log path:%s", exit_code, log_path)
                     job.status = Job.STATUS_DONE
+                    job.percent_complete = 100
                     job.end_time = timezone.now()
+                    job.time_remaining = 0
                     job.save()
                 elif not exit_by_user:
                     logger.error("zmap return error code:%s, log path:%s", exit_code, log_path)
