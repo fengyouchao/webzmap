@@ -93,8 +93,8 @@ class Zmap(object):
     def run_job(self, job):
         pass
 
-    def scan(self, port, output_path=None, log_path=None, bandwidth=2, white_list=None, black_list=None, verbosity=None,
-             status_updates_path=None, quiet=False, stdout=None, stderr=None):
+    def scan(self, port, subnets=None, output_path=None, log_path=None, bandwidth=2, white_list=None, black_list=None,
+             verbosity=None, status_updates_path=None, quiet=False, stdout=None, stderr=None):
         if verbosity:
             self.verbosity = verbosity
         cmd = "%s -p %s" % (self.execute_bin, port)
@@ -121,11 +121,12 @@ class Zmap(object):
             create_parent_dir(log_path)
             cmd += " -l %s" % log_path
         cmd += ' -v %s' % self.verbosity
+        if subnets:
+            cmd += ' ' + subnets
         if quiet:
             cmd += ' -q'
         cmd = filter(lambda x: x.strip() != '', cmd.split(" "))
-        p = subprocess.Popen(cmd, stderr=stderr, stdout=stdout, cwd=self.cwd)
-        return p
+        return subprocess.Popen(cmd, stderr=stderr, stdout=stdout, cwd=self.cwd)
 
 
 if __name__ == '__main__':

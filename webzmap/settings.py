@@ -114,11 +114,13 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
+WORK_DIR = os.path.join(BASE_DIR, "workspace")
 
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
+    os.path.join(WORK_DIR),
 )
 
 REST_FRAMEWORK = {
@@ -128,8 +130,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
-
-WORK_DIR = os.path.join(BASE_DIR, "workspace")
 
 if not os.path.exists(WORK_DIR):
     os.makedirs(WORK_DIR)

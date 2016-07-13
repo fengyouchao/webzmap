@@ -14,7 +14,7 @@ function updateJobStatus(){
 
 function getJobOptions(){
     var aj = $.ajax( {
-        url:'api/jobs',
+        url:'/api/jobs',
         type:'options',
         cache:false,
         dataType:'json',
@@ -38,8 +38,9 @@ function getJobOptions(){
                $('#selectBlackListFile').append(html);
             });
         },
-        error : function() {
-            alert('异常！');
+        error : function(request) {
+            var data = eval('(' + request.responseText + ')');
+            alert(data.detail);
          }
     });
 }
@@ -60,21 +61,65 @@ function createJob(){
     $.ajax({
         cache: true,
         type: "POST",
-        url:'api/jobs/',
+        url:'/api/jobs/',
         data:$('#newJobForm').serialize(),
         async: true,
-        error: function(request) {
-            $("#createJobButton").removeClass('disabled');
-            request.responseText
-            console.log(request)
-            alert("Error")
-        },
         success: function(data) {
             $("#createJobButton").removeClass('disabled');
             console.log(data)
             location.reload();
+        },
+        error: function(request) {
+            $("#createJobButton").removeClass('disabled');
+            console.log(request)
+            var data = eval('(' + request.responseText + ')');
+            for(var key in data){
+                alert(key+':'+data[key])
+            }
         }
     });
+}
+
+function deleteJob(url){
+    var aj = $.ajax( {
+        url:url,
+        type:'DELETE',
+        cache:false,
+        dataType:'json',
+        success:function(data) {
+            console.log(data)
+//            location.reload();
+        },
+        error : function(request) {
+            console.log(request)
+            var data = eval('(' + request.responseText + ')');
+            alert(data.detail);
+         }
+    });
+}
+
+function getLog(id){
+    url = '/static/' + id + '/job.log';
+    $('#logContainer').empty();
+    var aj = $.ajax( {
+        url:url,
+        type:'GET',
+        cache:false,
+        dataType:'text',
+        success:function(data) {
+            console.log(data)
+            $('#logContainer').append(data);
+        },
+        error : function(request) {
+            console.log(request)
+            $('#logContainer').append("Get log failed");
+         }
+    });
+}
+
+function showLog(id){
+    $('#logModal').modal('show');
+    getLog(id);
 }
 
 

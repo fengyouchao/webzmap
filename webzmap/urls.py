@@ -25,7 +25,8 @@ class JobSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Job
         fields = (
-            'url', 'id', 'name', 'port', 'status', 'bandwidth', 'verbosity', 'priority', 'creation_time', 'pid',
+            'url', 'id', 'name', 'port', 'subnets', 'status', 'bandwidth', 'verbosity', 'priority', 'creation_time',
+            'pid',
             'read_time',
             'time_elapsed',
             'time_remaining', 'percent_complete', 'active_send_threads', 'sent_total', 'sent_last_one_sec',

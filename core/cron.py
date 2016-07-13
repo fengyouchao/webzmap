@@ -73,7 +73,7 @@ def execute_job():
                 log_path = os.path.join(job_home_path, 'job.log')
                 status_path = os.path.join(job_home_path, 'status.txt')
                 zmap = Zmap(cwd=cwd, execute_bin=zmap_path)
-                process = zmap.scan(job.port, output_path=output_path, log_path=log_path,
+                process = zmap.scan(job.port, subnets=job.subnets, output_path=output_path, log_path=log_path,
                                     verbosity=job.verbosity, bandwidth=job.bandwidth, status_updates_path=status_path)
                 job.pid = process.pid
                 job.save()
@@ -129,5 +129,5 @@ def execute_job():
                     job.end_time = timezone.now()
                     job.save()
 
-    except BaseException, e:
+    except BaseException as e:
         logger.exception(e.message)

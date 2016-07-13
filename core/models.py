@@ -93,6 +93,7 @@ class Job(models.Model):
     id = models.CharField(max_length=32, default=gen_job_id, primary_key=True, verbose_name=u'ID')
     name = models.CharField(max_length=30, default=u'扫描任务', verbose_name=u'任务名称')
     port = models.IntegerField(verbose_name=u'扫描端口')
+    subnets = models.CharField(max_length=255, null=True, blank=True, verbose_name=u'目标子网')
     bandwidth = models.IntegerField(default=ZMAP['DEFAULT_BANDWIDTH'], verbose_name=u'带宽')
     priority = models.IntegerField(choices=PRIORITY, default=1, verbose_name=u'优先级')
     white_list_file = models.ForeignKey(WhiteListFile, null=True, blank=True, verbose_name='白名单')
