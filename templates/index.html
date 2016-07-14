@@ -41,6 +41,8 @@
                         <th>Name</th>
                         <th>Progress</th>
                         <th>Status</th>
+                        <th>Hit</th>
+                        <th>Hit Rate</th>
                         <th>Left Time</th>
                         <th>Action</th>
                     </tr>
@@ -160,16 +162,16 @@
 <script id="jobRow" type="text/html">{% verbatim %}
 <tr id="{{job.id}}">
     <th scope="row">{{index+1}}</th>
-    <td>{{job.name}}</td>
+    <td id="{{job.id}}-name">{{job.name}}</td>
     <td>
         <div class="progress">
             <div class="progress-bar progress-bar-default progress-bar-striped {{if job.status==1}} active{{/if}}"
                  role="progressbar" aria-valuenow="job.percent_complete"
-                 aria-valuemin="0" aria-valuemax="100" style="width: {{job.percent_complete}}%">
+                 aria-valuemin="0" aria-valuemax="100" style="width: {{job.percent_complete}}%" id="{{job.id}}-progress">
             </div>
         </div>
     </td>
-    <td>{{if job.status == 0}}<span class="label label-default">Pending</span>
+    <td id="{{job.id}}-status">{{if job.status == 0}}<span class="label label-default">Pending</span>
         {{else if job.status == 1}}<span class="label label-info">Running</span>
         {{else if job.status == 2}}<span class="label label-success">Done</span>
         {{else if job.status == 3}}<span class="label label-danger">Error</span>
@@ -178,17 +180,30 @@
         {{else if job.status == 6}}<span class="label label-warning">Canceled</span>
         {{/if}}
     </td>
-    <td>
-        {{if job.status==1}}{{job.time_remaining}}s{{else}}-{{/if}}
+    <td id="{{job.id}}-hit">{{job.recv_success_total}}</td>
+    <td id="{{job.id}}-hitRate">{{job.recv_success_total/job.sent_total | percentFormat }} </td>
+    <td id="{{job.id}}-left">
+        {{if job.status==1}}{{job.time_remaining | readableTime}}{{else}}-{{/if}}
     </td>
     <td>
-        <a href="{{if job.status != 2}}#{{else}}static/{{job.id}}/output.txt{{/if}}"
-           class="btn btn-sm btn-default" {{if job.status != 2}}disabled="disabled"{{/if}}><span class="glyphicon glyphicon-download" aria-hidden="true"></span>Download</a>
-        <button type="button" class="btn btn-sm btn-default" {{if job.status== 0}}disabled="disabled" {{ /if}} onclick="showLog('{{job.id}}')">Log</button>
+        <a href="/static/{{job.id}}/output.txt"
+           class="btn btn-sm btn-default"  id="{{job.id}}-download"><span class="glyphicon glyphicon-download" aria-hidden="true"></span>Download</a>
+        <button type="button" class="btn btn-sm btn-default" {{if job.status== 0}}disabled="disabled" {{ /if}} onclick="showLog('{{job.id}}')" id="{{job.id}}-log">Log</button>
         <!--<button type="button" class="btn btn-sm btn-danger" onclick="deleteJob('{{job.url}}')">DELETE</button>-->
         <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteJobModal('{{job.url}}')"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
     </td>
 </tr>{% endverbatim %}
+</script>
+<script id="statusTemplate" type="text/html">{% verbatim %}
+{{if status == 0}}<span class="label label-default">Pending</span>
+{{else if status == 1}}<span class="label label-info">Running</span>
+{{else if status == 2}}<span class="label label-success">Done</span>
+{{else if status == 3}}<span class="label label-danger">Error</span>
+{{else if status == 4}}<span class="label label-warning">Paused</span>
+{{else if status == 5}}<span class="label label-warning">Stopped</span>
+{{else if status == 6}}<span class="label label-warning">Canceled</span>
+{{/if}}
+{% endverbatim %}
 </script>
 <script id="fileOption" type="text/html">{% verbatim %}
 <option value="{{file.value}}">{{file.display_name}}</option>{% endverbatim %}

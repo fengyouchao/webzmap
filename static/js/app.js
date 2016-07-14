@@ -1,3 +1,42 @@
+jobList = null;
+
+function readableTime(seconds) {
+    if(isNaN(seconds)){
+        return "-";
+    }
+    day = Math.floor(seconds / 86400);
+    hour = Math.floor((seconds - day * 86400) / 3600);
+    minute = Math.floor((seconds - day * 86400 - hour * 3600 ) / 60);
+    second = seconds - day * 86400 - hour * 3600 - minute * 60
+    if(hour < 10){
+        hour = "0" + hour;
+    }
+    if(minute < 10){
+        minute = "0" + minute;
+    }
+    if(second < 10){
+        second = "0" + second;
+    }
+    if(day == 0){
+        return hour + ":" + minute + ":" + second;
+    }else{
+        return day + "d " + hour + ":" + minute + ":" + second;
+    }
+}
+
+function percentFormat(number) {
+    if(isNaN(number)){
+        return "-";
+    }
+    number = number * 100;
+    var percent =number.toFixed(2);
+    return percent+"%";
+}
+
+template.helper('percentFormat', percentFormat);
+
+template.helper('readableTime',readableTime);
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -34,8 +73,9 @@ function sameOrigin(url) {
 }
 
 
-function updateJobStatus(){
+function showAllJobs(){
    $.get("api/jobs", function(result){
+        jobList = result;
         $("#tableBody").empty();
         $.each(result,function(n,value) {
            var data = {job: value, index:n}
@@ -103,7 +143,7 @@ function createJob(){
         success: function(data) {
             $("#createJobButton").removeClass('disabled');
             $('#newJobModal').modal('hide');
-            updateJobStatus();
+            showAllJobs();
         },
         error: function(request) {
             $("#createJobButton").removeClass('disabled');
@@ -129,7 +169,7 @@ function deleteJob(url){
         success:function(data) {
             console.log(data)
             $('#deleteJobModal').modal('hide');
-            updateJobStatus();
+            showAllJobs();
         },
         error : function(request) {
             console.log(request)
@@ -165,11 +205,53 @@ function showLog(id){
     });
 }
 
+function updateJobStatus(){
+    $.get("api/jobs", function(result){
+        jobList = result;
+        $.each(result,function(n,job) {
+            id = job.id;
+            nameId = "#"+id+"-name";
+            progressId = "#" + id + "-progress";
+            statusId = "#" + id + "-status";
+            hitId = "#" + id + "-hit";
+            hitRateId = "#" + id + "-hitRate";
+            leftId = "#" + id + "-left";
+            logId = "#" + id + "-log";
+            downloadId = "#" + id + "-download";
+            $(nameId).html(job.name);
+            $(progressId).attr("style", "width: "+job.percent_complete+"%");
+            $(progressId).attr("aria-valuenow", job.percent_complete);
+            if(job.status == 1){
+                $(progressId).addClass("active");
+                $(leftId).html(readableTime(job.time_remaining));
+            }else{
+                $(progressId).removeClass("active");
+                $(leftId).html("-");
+            }
+            if(job.status==0){
+                $(logId).attr("disabled", "disabled");
+                $(downloadId).attr("disabled", "disabled");
+                $(downloadId).attr("href", "#");
+            }else{
+                $(logId).removeAttr("disabled");
+                $(downloadId).removeAttr("disabled");
+                $(downloadId).attr("href", "/static/"+job.id+"/output.txt");
+            }
+            var data = {status:job.status}
+            var html = template('statusTemplate', data);
+            $(statusId).html(html);
+            $(hitId).html(job.recv_success_total);
+            $(hitRateId).html(percentFormat(job.recv_success_total/job.sent_total));
+        });
+    });
+}
+
 function autoUpdateStatus(time){
     updateJobStatus();
     setTimeout("autoUpdateStatus("+time+")", time )
 }
 
 $(document).ready(function(){
+    showAllJobs();
     autoUpdateStatus(1000);
 });
