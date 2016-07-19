@@ -100,7 +100,7 @@ router.register(r'blacklistfiles', BlackListFileViewSet)
 router.register(r'commands', CommandViewSet)
 
 urlpatterns = [
-    url(r'^', include("core.urls")),
+    url(r'^', include("core.urls", namespace="core")),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))

@@ -17,6 +17,10 @@
             <li><a href="/api">REST API</a></li>
             <li><a href="/admin">Admin</a></li>
         </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'core:logout' %}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>Logout </a></li>
+            <li></li>
+        </ul>
     </div>
 </nav>
 
@@ -44,6 +48,7 @@
                         <th>Hit</th>
                         <th>Hit Rate</th>
                         <th>Left Time</th>
+                        <th>Operation</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -186,10 +191,18 @@
         {{if job.status==1}}{{job.time_remaining | readableTime}}{{else}}-{{/if}}
     </td>
     <td>
+        {{if job.status==1}}
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-pause" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 0)"></span></button>
+        {{else if job.status == 4}}
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-play" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 1)"></span></button>
+        {{else}}
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-repeat" id="{{job.id}}-operation"></span></button>
+        {{/if}}
+    </td>
+    <td>
         <a href="/static/{{job.id}}/output.txt"
            class="btn btn-sm btn-default"  id="{{job.id}}-download"><span class="glyphicon glyphicon-download" aria-hidden="true"></span>Download</a>
         <button type="button" class="btn btn-sm btn-default" {{if job.status== 0}}disabled="disabled" {{ /if}} onclick="showLog('{{job.id}}')" id="{{job.id}}-log">Log</button>
-        <!--<button type="button" class="btn btn-sm btn-danger" onclick="deleteJob('{{job.url}}')">DELETE</button>-->
         <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteJobModal('{{job.url}}')"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
     </td>
 </tr>{% endverbatim %}

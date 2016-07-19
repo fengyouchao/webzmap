@@ -218,6 +218,7 @@ function updateJobStatus(){
             leftId = "#" + id + "-left";
             logId = "#" + id + "-log";
             downloadId = "#" + id + "-download";
+            operationId = "#" + id+ "-operation";
             $(nameId).html(job.name);
             $(progressId).attr("style", "width: "+job.percent_complete+"%");
             $(progressId).attr("aria-valuenow", job.percent_complete);
@@ -237,12 +238,43 @@ function updateJobStatus(){
                 $(downloadId).removeAttr("disabled");
                 $(downloadId).attr("href", "/static/"+job.id+"/output.txt");
             }
+            if(job.status == 1){
+                $(operationId).attr("class", "glyphicon glyphicon-pause");
+                $(operationId).attr("onclick", "createCommand('"+job.url+"', 0)");
+            }else if(job.status== 4){
+                $(operationId).attr("class", "glyphicon glyphicon-play");
+                $(operationId).attr("onclick", "createCommand('"+job.url+"', 1)");
+            }else{
+                $(operationId).attr("class", "glyphicon glyphicon-repeat");
+            }
             var data = {status:job.status}
             var html = template('statusTemplate', data);
             $(statusId).html(html);
             $(hitId).html(job.recv_success_total);
             $(hitRateId).html(percentFormat(job.recv_success_total/job.sent_total));
         });
+    });
+}
+
+function createCommand(job_url, cmd){
+    var csrftoken = getCookie('csrftoken');
+    data = {'job':job_url, cmd:cmd}
+    var aj = $.ajax( {
+        url:'/api/commands/',
+        type:'POST',
+        data: data,
+        headers:{'X-CSRFToken':csrftoken},
+        async: true,
+        cache:false,
+        dataType:'json',
+        success:function(data) {
+
+        },
+        error : function(request) {
+            console.log(request)
+            var data = eval('(' + request.responseText + ')');
+            alert(data.detail);
+         }
     });
 }
 

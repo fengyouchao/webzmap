@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load staticfiles %}
+{% block title %}Login - WebZmap{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="text-center title">
+            <img width="55%" class="paper" src="{% static 'img/webzmap.png' %}"/>
+        </div>
+        <div class="col-md-4 col-sm-offset-4 col-sm-4 col-sm-offset-4">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading"><h1>WebZmap Login</h1></div>-->
+                <div class="panel-body">
+                    {% if error %}<div class="alert alert-danger">{{error}}</div>{% endif %}
+                    <form action="{% url 'core:login' %}" method="post">
+                        {% csrf_token %}
+                        <input hidden="hidden" name="next" value="{{next}}">
+                        <div class="form-group">
+                            <label for="inputUsername">Username</label>
+                            <input type="text" class="form-control" id="inputUsername" placeholder="Username"
+                                   name="username" autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputPassword">Password</label>
+                            <input type="password" class="form-control" id="inputPassword" placeholder="Password"
+                                   name="password">
+                        </div>
+                        <button type="submit" class="btn btn-default">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
