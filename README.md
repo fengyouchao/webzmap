@@ -70,7 +70,7 @@ python manage.py runserver
 
 1. 提交任务后任务一直处于Pending状态
 
-由于 **WebZmap** 通过crontab检查新任务并执行, contab最小执行周期为1分钟, 任务创建后, 会在一分钟以内自动执行。如果超过一分钟后任务仍然为Pending状态, 可能是您没有添加crontab任务, 请执行以下命令添加crontab任务
+由于 **WebZmap** 通过crontab检查新任务并执行, crontab最小执行周期为1分钟, 任务创建后, 会在一分钟以内自动执行。如果超过一分钟后任务仍然为Pending状态, 可能是您没有添加crontab任务, 请执行以下命令添加crontab任务
 
 ```shell
 sudo python manage.py crontab add
