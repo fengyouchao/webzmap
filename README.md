@@ -21,22 +21,22 @@
 
 # Install
 
-安装 *zmap*, 安装方式请查看[zmap官方文档](https://zmap.io/download.html)
+:one:安装 *zmap*, 安装方式请查看[zmap官方文档](https://zmap.io/download.html)
 
-克隆项目
+:two:克隆项目
 
 ```shell
 git clone https://github.com/fengyouchao/webzmap
 ```
 
-安装依赖
+:three:安装依赖
 
 ```shell
 cd webzmap
 sudo -H pip install -r requirments.txt
 ```
 
-初始化
+:four:初始化
 
 ```shell
 python manage.py migrate #创建数据库
@@ -44,7 +44,7 @@ python manage.py createsuperuser #创建系统用户
 sudo python manage.py crontab add #添加用于执行zmap任务的crontab任务，必须以root权限执行
 ```
 
-确认zmap执行路径
+:five:确认zmap执行路径
 ```shell
 where zmap
 ```
@@ -58,7 +58,7 @@ ZMAP = {
 }
 ```
 
-运行
+:six:运行
 
 ```shell
 python manage.py runserver
@@ -68,10 +68,14 @@ python manage.py runserver
 
 # FAQ
 
-1. 提交任务后任务一直处于Pending状态
+:one:提交任务后任务一直处于Pending状态
 
 由于 **WebZmap** 通过crontab检查新任务并执行, crontab最小执行周期为1分钟, 任务创建后, 会在一分钟以内自动执行。如果超过一分钟后任务仍然为Pending状态, 可能是您没有添加crontab任务, 请执行以下命令添加crontab任务
 
 ```shell
 sudo python manage.py crontab add
 ```
+
+:two:执行日志显示`[FATAL] csv: could not open output file (xxx/webzmap/workspace/xxx/status.txt)`
+
+目前测试发现，这应该是zmap的一个bug，测试版本号为`2.1.1`, 在指定`-u`参数时，有一定概率发生此问题，目前解决办法为重新创建任务。
