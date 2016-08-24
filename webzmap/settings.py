@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_crontab',
     'rest_framework',
     'core',
 ]
@@ -138,13 +137,10 @@ if not os.path.exists(WORK_DIR):
 ZMAP = {
     "PATH": "/usr/local/sbin/zmap",
     "CWD": WORK_DIR,
-    "MAX_BANDWIDTH": 100,
+    "MAX_BANDWIDTH": 8,
     "DEFAULT_BANDWIDTH": 1,
+    "PID_FILE": "/var/run/zmapd.pid"
 }
-
-CRONJOBS = [
-    ('*/1 * * * *', 'core.cron.execute_job'),
-]
 
 LOGGING = {
     'version': 1,

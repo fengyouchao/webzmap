@@ -15,9 +15,8 @@
 1. zmap
 2. Python 2.7
 3. django 1.10
-4. django-crontab 0.7.1
-5. requests 2.9.1
-6. djangorestframework 3.4.4
+4. requests 2.9.1
+5. djangorestframework 3.4.4
 
 # Install
 
@@ -41,7 +40,7 @@ sudo -H pip install -r requirments.txt
 ```shell
 python manage.py migrate #创建数据库
 python manage.py createsuperuser #创建系统用户
-sudo python manage.py crontab add #添加用于执行zmap任务的crontab任务，必须以root权限执行
+sudo python manage.py zmapd start #启动用于执行zmap任务的zmapd服务，必须以root权限执行
 ```
 
 :five:确认zmap执行路径
@@ -70,10 +69,15 @@ python manage.py runserver
 
 :one:提交任务后任务一直处于Pending状态
 
-由于 **WebZmap** 通过crontab检查新任务并执行, crontab最小执行周期为1分钟, 任务创建后, 会在一分钟以内自动执行。如果超过一分钟后任务仍然为Pending状态, 可能是您没有添加crontab任务, 请执行以下命令添加crontab任务
+请检查是否启动了zmapd服务
 
 ```shell
-sudo python manage.py crontab add
+sudo python manage.py zmapd status
+```
+
+启动zmapd
+```shell
+sudo python manage.py zmapd start
 ```
 
 :two:执行日志显示`[FATAL] csv: could not open output file (xxx/webzmap/workspace/xxx/status.txt)`
