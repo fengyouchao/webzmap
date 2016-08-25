@@ -48,7 +48,7 @@
                         <th>Hit</th>
                         <th>Hit Rate</th>
                         <th>Left Time</th>
-                        <th>Operation</th>
+                        <!--<th>Operation</th>-->
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -190,15 +190,15 @@
     <td id="{{job.id}}-left">
         {{if job.status==1}}{{job.time_remaining | readableTime}}{{else}}-{{/if}}
     </td>
-    <td>
-        {{if job.status==1}}
-        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-pause" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 0)"></span></button>
-        {{else if job.status == 4}}
-        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-play" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 1)"></span></button>
-        {{else}}
-        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-repeat" id="{{job.id}}-operation"></span></button>
-        {{/if}}
-    </td>
+    <!--<td>-->
+        <!--{{if job.status==1}}-->
+        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-pause" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 0)"></span></button>-->
+        <!--{{else if job.status == 4}}-->
+        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-play" id="{{job.id}}-operation" onclick="createCommand('{{job.url}}', 1)"></span></button>-->
+        <!--{{else}}-->
+        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-repeat" id="{{job.id}}-operation"></span></button>-->
+        <!--{{/if}}-->
+    <!--</td>-->
     <td>
         <a href="/static/{{job.id}}/output.txt"
            class="btn btn-sm btn-default"  id="{{job.id}}-download"><span class="glyphicon glyphicon-download" aria-hidden="true"></span>Download</a>
