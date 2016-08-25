@@ -1,8 +1,10 @@
 from core.models import Job, Command
 from django.utils import timezone
+from django.core.management.base import CommandError
 from tools.zmap import Zmap, get_current_status
-from webzmap.settings import ZMAP, WORK_DIR
+from webzmap.settings import WORK_DIR
 from django import db
+import default as settings
 import logging
 import os
 import time
@@ -10,16 +12,11 @@ import multiprocessing
 import signal
 import sys
 
-logger = logging.getLogger('cron')
-cwd = ZMAP['CWD']
-zmap_path = ZMAP['PATH']
-pid_file = ZMAP['PID_FILE']
-max_bandwidth = ZMAP['MAX_BANDWIDTH']
+logger = logging.getLogger('zmapd')
 
 
 def execute_job(job_id):
     job = Job.objects.get(id=job_id)
-    print "start job", job.name
     job_home_path = os.path.join(WORK_DIR, job.id)
     if not os.path.exists(job_home_path):
         os.makedirs(job_home_path)
@@ -30,18 +27,28 @@ def execute_job(job_id):
     output_path = os.path.join(job_home_path, 'output.txt')
     log_path = os.path.join(job_home_path, 'job.log')
     status_path = os.path.join(job_home_path, 'status.txt')
-    zmap = Zmap(cwd=cwd, execute_bin=zmap_path)
+    zmap = Zmap(cwd=settings.cwd, execute_bin=settings.zmap_path)
     process = zmap.scan(job.port, subnets=job.subnets, output_path=output_path, log_path=log_path,
                         verbosity=job.verbosity, bandwidth=job.bandwidth, status_updates_path=status_path,
-                        stderr=file("/dev/null"))
+                        stderr=open("/dev/null"))
     job.pid = process.pid
     job.save()
     exit_code = process.poll()
     exit_by_user = False
     while exit_code is None:
+        # check job is deleted
+        try:
+            Job.objects.get(id=job.id)
+        except Job.DoesNotExist:
+            process.send_signal(signal.SIGKILL)
+            exit_by_user = True
+            logger.info("stopped deleted job:id[%s] name[%s]", job.id, job.name)
+            time.sleep(1)
+            exit_code = process.poll()
+            continue
         commands = Command.objects.filter(job=job, status=Command.STATUS_PENDING).order_by('creation_time')
         for command in commands:
-            logger.info("execute job:[%s], type:%s", command.job.id, command.cmd)
+            logger.info("execute command on job:[%s], type:%s", command.job.id, command.cmd)
             if command.cmd == Command.CMD_PAUSE:
                 if job.status == Job.STATUS_RUNNING:
                     process.send_signal(signal.SIGSTOP)
@@ -95,18 +102,20 @@ def execute_job(job_id):
 
 
 def start():
-    if os.path.exists(pid_file):
+    if not os.path.exists(settings.zmap_path):
+        raise CommandError('[%s] not found. Please set the correct zmap path' % settings.zmap_path)
+    if os.path.exists(settings.pid_file):
         sys.stdout.write("zmapd is already started\n")
         sys.exit()
-    run_daemon_process(pid_file=pid_file, start_msg="Start zmapd(%s)\n")
+    run_daemon_process(pid_file=settings.pid_file, start_msg="Start zmapd(%s)\n")
     while True:
         time.sleep(1)
         running_jobs = Job.objects.filter(status=Job.STATUS_RUNNING)
         total_bandwidth = 0
         for job in running_jobs:
             total_bandwidth += job.bandwidth
-        if total_bandwidth >= max_bandwidth:
-            logger.debug(u"Achieve maximum bandwidth:%sM", max_bandwidth)
+        if total_bandwidth >= settings.max_bandwidth:
+            logger.debug(u"Achieve maximum bandwidth:%sM", settings.max_bandwidth)
             continue
         jobs = [x for x in Job.objects.filter(status=Job.STATUS_PENDING).order_by('-priority')]
         db.close_old_connections()
@@ -117,7 +126,7 @@ def start():
 
 def status():
     try:
-        f = open(pid_file, 'r')
+        f = open(settings.pid_file, 'r')
         pid = int(f.readline())
         sys.stdout.write('zmapd(pid %d) is running...\n' % pid)
     except IOError:
@@ -125,17 +134,19 @@ def status():
 
 
 def stop():
-    sys.stdout.write("Stopping zmapd...\n")
+    sys.stdout.write("Stopping zmapd...")
     try:
-        f = open(pid_file, 'r')
+        f = open(settings.pid_file, 'r')
         pid = int(f.readline())
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError:
+            sys.stdout.write("                 [FAILED]\n")
             sys.stdout.write("zmapd is not running\n")
-        os.remove(pid_file)
+        os.remove(settings.pid_file)
         sys.stdout.write("                 [OK]\n")
     except IOError:
+        sys.stdout.write("                 [FAILED]\n")
         sys.stdout.write("zmapd is not running\n")
 
 

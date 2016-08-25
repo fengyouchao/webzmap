@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.utils import timezone
-from webzmap.settings import WORK_DIR, ZMAP
+from webzmap.settings import WORK_DIR
+import default as settings
 import os
 import uuid
 
@@ -94,7 +95,7 @@ class Job(models.Model):
     name = models.CharField(max_length=30, default=u'扫描任务', verbose_name=u'任务名称')
     port = models.IntegerField(verbose_name=u'扫描端口')
     subnets = models.CharField(max_length=255, null=True, blank=True, verbose_name=u'目标子网')
-    bandwidth = models.IntegerField(default=ZMAP['DEFAULT_BANDWIDTH'], verbose_name=u'带宽')
+    bandwidth = models.IntegerField(default=settings.default_bandwidth, verbose_name=u'带宽')
     priority = models.IntegerField(choices=PRIORITY, default=1, verbose_name=u'优先级')
     white_list_file = models.ForeignKey(WhiteListFile, null=True, blank=True, verbose_name='白名单')
     black_list_file = models.ForeignKey(BlackListFile, null=True, blank=True, verbose_name=u'黑名单')

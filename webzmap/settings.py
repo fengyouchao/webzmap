@@ -134,13 +134,7 @@ if not os.path.exists(WORK_DIR):
     os.makedirs(WORK_DIR)
     os.chmod(WORK_DIR, 0777)
 
-ZMAP = {
-    "PATH": "/usr/local/sbin/zmap",
-    "CWD": WORK_DIR,
-    "MAX_BANDWIDTH": 8,
-    "DEFAULT_BANDWIDTH": 1,
-    "PID_FILE": "/var/run/zmapd.pid"
-}
+ZMAP_CWD = WORK_DIR
 
 LOGGING = {
     'version': 1,
@@ -161,7 +155,7 @@ LOGGING = {
         'file_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'job.log'),
+            'filename': os.path.join(BASE_DIR, 'zmapd.log'),
             'formatter': 'standard',
         },
     },
@@ -171,7 +165,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'cron': {
+        'zmapd': {
             'handlers': ['file_handler'],
             'level': 'DEBUG',
             'propagate': False

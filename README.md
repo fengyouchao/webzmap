@@ -47,14 +47,9 @@ sudo python manage.py zmapd start #启动用于执行zmap任务的zmapd服务，
 ```shell
 where zmap
 ```
-**WebZmap** 默认的zmap执行路径为 `/usr/local/sbin/zmap` 如果 `where zmap` 的路径不是该值, 编辑 `webzmap/settings.py` 找到以下内容并修改 `PATH`值
+**WebZmap** 默认的zmap执行路径为 `/usr/local/sbin/zmap` 如果 `where zmap` 的路径不是该值, 编辑 `webzmap/settings.py`, 在文件最后添加以下内容:
 ```python
-ZMAP = {
-    "PATH": "/usr/local/sbin/zmap",
-    "CWD": WORK_DIR,
-    "MAX_BANDWIDTH": 100,
-    "DEFAULT_BANDWIDTH": 1,
-}
+ZMAP_PATH = 'your zmap bin path'
 ```
 
 :six:运行
