@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Webzmap by fengyouchao</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Webzmap</h1>
+      <h2 class="project-tagline">Zmap on Web</h2>
+      <a href="https://github.com/fengyouchao/webzmap" class="btn">View on GitHub</a>
+      <a href="https://github.com/fengyouchao/webzmap/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/fengyouchao/webzmap/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="webzmap" class="anchor" href="#webzmap" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WebZmap</h1>
+
+<p><strong>WebZmap</strong> 是一个通过web方式管理运行zmap扫描任务， 并提供 <strong>RESTful API</strong> 方便第三方程序调用控制zmap任务</p>
+
+<p>目前该项目还在开发中,很多功能待完善, 由于个人时间精力有限, 开发进度有点慢, 有兴趣的朋友可以fork, 并给我PR</p>
+
+<h1>
+<a id="goal" class="anchor" href="#goal" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Goal</h1>
+
+<ol>
+<li>通过Web管理zmap任务(70%)</li>
+<li>通过RESTful API为第三方程序提供接口(60%)</li>
+<li>分布式扫描(0%)</li>
+</ol>
+
+<h1>
+<a id="dependency" class="anchor" href="#dependency" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependency</h1>
+
+<ol>
+<li>zmap</li>
+<li>Python 2.7</li>
+<li>django 1.10</li>
+<li>requests 2.9.1</li>
+<li>djangorestframework 3.4.4</li>
+</ol>
+
+<h1>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h1>
+
+<ol>
+<li><p>安装 <em>zmap</em>, 安装方式请查看<a href="https://zmap.io/download.html">zmap官方文档</a></p></li>
+<li>
+<p>克隆项目</p>
+
+<div class="highlight highlight-source-shell"><pre>git clone https://github.com/fengyouchao/webzmap</pre></div>
+</li>
+<li>
+<p>安装依赖</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">cd</span> webzmap
+sudo -H pip install -r requirments.txt</pre></div>
+</li>
+<li>
+<p>初始化</p>
+
+<div class="highlight highlight-source-shell"><pre>python manage.py migrate <span class="pl-c">#创建数据库</span>
+python manage.py createsuperuser <span class="pl-c">#创建系统用户</span>
+sudo python manage.py zmapd start <span class="pl-c">#启动用于执行zmap任务的zmapd服务，必须以root权限执行</span></pre></div>
+</li>
+<li>
+<p>确认zmap执行路径</p>
+
+<div class="highlight highlight-source-shell"><pre>where zmap</pre></div>
+
+<p><strong>WebZmap</strong> 默认的zmap执行路径为 <code>/usr/local/sbin/zmap</code> 如果 <code>where zmap</code> 的路径不是该值, 编辑 <code>webzmap/settings.py</code>, 在文件最后添加以下内容:</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-c1">ZMAP_PATH</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>your zmap bin path<span class="pl-pds">'</span></span></pre></div>
+</li>
+<li>
+<p>运行</p>
+
+<div class="highlight highlight-source-shell"><pre>python manage.py runserver <span class="pl-c">#请勿在生产环境使用此方式运行</span></pre></div>
+
+<p>访问 <code>http://localhost:8000</code></p>
+</li>
+</ol>
+
+<h1>
+<a id="deploy" class="anchor" href="#deploy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Deploy</h1>
+
+<p>如果要在生产环境中部署webzmap, 可以通过以下步骤完成:</p>
+
+<ol>
+<li>
+<p>编辑<code>webzmap/settings.py</code>在文件最后添加以下内容</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-c1">DEBUG</span> <span class="pl-k">=</span> <span class="pl-c1">False</span>
+<span class="pl-c1">ALLOWED_HOSTS</span> <span class="pl-k">=</span> [<span class="pl-s"><span class="pl-pds">'</span>*<span class="pl-pds">'</span></span>] <span class="pl-c"># 设置允许访问该站点的host, * 表示任意host, 如果您希望只能通过域名访问,在这里设置域名</span></pre></div>
+</li>
+<li><p>查看<a href="https://docs.djangoproject.com/en/1.10/howto/deployment/">Deploying Django</a></p></li>
+</ol>
+
+<h1>
+<a id="faq" class="anchor" href="#faq" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>FAQ</h1>
+
+<ol>
+<li>
+<p>提交任务后任务一直处于Pending状态</p>
+
+<p>请检查是否启动了zmapd服务</p>
+
+<div class="highlight highlight-source-shell"><pre>sudo python manage.py zmapd status</pre></div>
+
+<p>启动zmapd</p>
+
+<div class="highlight highlight-source-shell"><pre>sudo python manage.py zmapd start</pre></div>
+</li>
+<li>
+<p>执行日志显示<code>[FATAL] csv: could not open output file (xxx/webzmap/workspace/xxx/status.txt)</code></p>
+
+<p>目前测试发现，这应该是zmap的一个bug，测试版本号为<code>2.1.1</code>, 在指定<code>-u</code>参数时，有一定概率发生此问题，目前解决办法为重新创建任务。</p>
+</li>
+</ol>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/fengyouchao/webzmap">Webzmap</a> is maintained by <a href="https://github.com/fengyouchao">fengyouchao</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
