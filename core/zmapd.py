@@ -1,6 +1,5 @@
 from core.models import Job, Command
 from django.utils import timezone
-from django.core.management.base import CommandError
 from tools.zmap import Zmap, get_current_status
 from webzmap.settings import WORK_DIR
 from django import db
@@ -11,8 +10,15 @@ import time
 import multiprocessing
 import signal
 import sys
+import fcntl
 
 logger = logging.getLogger('zmapd')
+
+
+class ProcessStatus(object):
+    def __init__(self, running=False, pid=-1):
+        self.running = running
+        self.pid = pid
 
 
 def execute_job(job_id):
@@ -102,12 +108,18 @@ def execute_job(job_id):
 
 
 def start():
-    if not os.path.exists(settings.zmap_path):
-        raise CommandError('[%s] not found. Please set the correct zmap path' % settings.zmap_path)
     if os.path.exists(settings.pid_file):
-        sys.stdout.write("zmapd is already started\n")
-        sys.exit()
+        with open(settings.pid_file) as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(f, fcntl.LOCK_UN)
+            except IOError:
+                sys.stdout.write("zmapd is already started\n")
+                return
+
     run_daemon_process(pid_file=settings.pid_file, start_msg="Start zmapd(%s)\n")
+    pid_file = open(settings.pid_file)
+    fcntl.flock(pid_file, fcntl.LOCK_SH)
     while True:
         time.sleep(1)
         running_jobs = Job.objects.filter(status=Job.STATUS_RUNNING)
@@ -125,27 +137,27 @@ def start():
 
 
 def status():
-    try:
-        f = open(settings.pid_file, 'r')
-        pid = int(f.readline())
-        sys.stdout.write('zmapd(pid %d) is running...\n' % pid)
-    except IOError:
+    process_status = get_process_status()
+    if process_status.running:
+        sys.stdout.write('zmapd(pid %d) is running...\n' % process_status.pid)
+    else:
         sys.stdout.write("zmapd is stopped\n")
 
 
 def stop():
     sys.stdout.write("Stopping zmapd...")
-    try:
-        f = open(settings.pid_file, 'r')
-        pid = int(f.readline())
-        try:
-            os.kill(pid, signal.SIGTERM)
-        except OSError:
-            sys.stdout.write("                 [FAILED]\n")
-            sys.stdout.write("zmapd is not running\n")
+    process_status = get_process_status()
+    if process_status.running:
+        with open(settings.pid_file, 'r') as f:
+            pid = int(f.readline())
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                sys.stdout.write("                 [FAILED]\n")
+                sys.stdout.write("zmapd is not running\n")
         os.remove(settings.pid_file)
         sys.stdout.write("                 [OK]\n")
-    except IOError:
+    else:
         sys.stdout.write("                 [FAILED]\n")
         sys.stdout.write("zmapd is not running\n")
 
@@ -153,6 +165,21 @@ def stop():
 def restart():
     stop()
     start()
+
+
+def get_process_status():
+    if os.path.exists(settings.pid_file):
+        with open(settings.pid_file) as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(f, fcntl.LOCK_UN)
+                os.remove(settings.pid_file)
+                return ProcessStatus(False)
+            except IOError:
+                pid = int(f.readline())
+                return ProcessStatus(True, pid)
+    else:
+        return ProcessStatus(False)
 
 
 def run_daemon_process(stdout='/dev/null', stderr=None, stdin='/dev/null',
@@ -198,7 +225,8 @@ def run_daemon_process(stdout='/dev/null', stderr=None, stdin='/dev/null',
         sys.stderr.write(start_msg % pid)
         sys.stderr.flush()
     if pid_file:
-        file(pid_file, 'w+').write("%s\n" % pid)
+        with open(pid_file, 'w+') as f:
+            f.write("%s\n" % pid)
     # Redirect standard file descriptors.
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
