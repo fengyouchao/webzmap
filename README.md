@@ -32,7 +32,7 @@
 
     ```shell
     cd webzmap
-    sudo -H pip install -r requirments.txt
+    sudo -H pip install -r requirements.txt
     ```
 
 4. 初始化
